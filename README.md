@@ -3,7 +3,8 @@
 ## Symfonycast
 
 - [x] Charming Development in Symfony 5
-- [ ] Symfony 5 Fundamentals: Services, Config & Environments
+- [x] Symfony 5 Fundamentals: Services, Config & Environments
+- [ ] Doctrine, Symfony & the Database
 
 ## Setup
 Make sure you have [Composer installed](https://getcomposer.org/download/)
