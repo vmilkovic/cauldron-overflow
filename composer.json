@@ -64,8 +64,12 @@
     },
     "extra": {
         "symfony": {
-            "allow-contrib": false,
+            "allow-contrib": true,
             "require": "5.2.*"
         }
+    },
+    "require-dev": {
+        "sentry/sentry-symfony": "^4.0",
+        "symfony/maker-bundle": "^1.29"
     }
 }
