@@ -67,10 +67,19 @@ class QuestionController extends AbstractController {
     /**
      *  @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show($slug, MarkdownHelper $markdownHelper){
+    public function show($slug, MarkdownHelper $markdownHelper, EntityManagerInterface $entityManager){
         
         if($this->isDebug){
             $this->logger->info('We are in debug mode!');
+        }
+
+        $repository = $entityManager->getRepository(Question::class);
+        
+        /** @var Question|null $question */
+        $question = $repository->findOneBy(['slug' => $slug]);
+        
+        if(!$question){
+            throw $this->createNotFoundException(sprintf('no question found for slug "%s"', $slug));
         }
 
         $answers = [
@@ -79,13 +88,8 @@ class QuestionController extends AbstractController {
             'Maybe... try saying the spell backwards?',
         ];
 
-        $questionText = "I've been turned into a cat, any thoughts on how to turn back? While I'm **adorable**, I don't really care for cat food.";
-
-        $parseQuestionText = $markdownHelper->parse($questionText);
-
         return $this->render('question/show.html.twig', [
-            'question' => ucwords(str_replace('-', ' ', $slug)),
-            'questionText' => $parseQuestionText,
+            'question' => $question,
             'answers' => $answers
         ]);
     }
