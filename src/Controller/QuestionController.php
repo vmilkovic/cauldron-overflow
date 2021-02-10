@@ -3,14 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Question;
-use Twig\Environment;
 use Psr\Log\LoggerInterface;
-use App\Service\MarkdownHelper;
 use Doctrine\ORM\EntityManagerInterface;
-use Sentry\State\HubInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Repository\QuestionRepository;
+use Symfony\Component\HttpFoundation\Request;
 
 class QuestionController extends AbstractController {
 
@@ -25,11 +24,13 @@ class QuestionController extends AbstractController {
     /**
      * @Route("/", name="app_homepage")
      */
-    public function homepage(Environment $twigEnviroment){ 
+    public function homepage(QuestionRepository $repository){ 
 
-        $html = $twigEnviroment->render('question/homepage.html.twig');
-        
-        return new Response($html);
+        $questions = $repository->findAllAskedOrderedByNewest();
+
+        return $this->render('question/homepage.html.twig', [
+            'questions' => $questions
+        ]);
     }
 
     /**
@@ -54,6 +55,8 @@ class QuestionController extends AbstractController {
             $question->setAskedAt(new \DateTime(sprintf('-%d days', rand(1, 100))));
         }
 
+        $question->setVotes(rand(-20, 50));
+
         $entityManager->persist($question);
         $entityManager->flush();
 
@@ -67,19 +70,10 @@ class QuestionController extends AbstractController {
     /**
      *  @Route("/questions/{slug}", name="app_question_show")
      */
-    public function show($slug, MarkdownHelper $markdownHelper, EntityManagerInterface $entityManager){
+    public function show(Question $question){
         
         if($this->isDebug){
             $this->logger->info('We are in debug mode!');
-        }
-
-        $repository = $entityManager->getRepository(Question::class);
-        
-        /** @var Question|null $question */
-        $question = $repository->findOneBy(['slug' => $slug]);
-        
-        if(!$question){
-            throw $this->createNotFoundException(sprintf('no question found for slug "%s"', $slug));
         }
 
         $answers = [
@@ -92,5 +86,20 @@ class QuestionController extends AbstractController {
             'question' => $question,
             'answers' => $answers
         ]);
+    }
+
+    /**
+     * @Route("/questions/{slug}/vote", name="app_question_vote", methods="POST")
+     */
+    public function questionVote(Question $question, Request $request){
+        $direction = $request->request->get('direction');
+
+        if($direction === 'up'){
+            $question->setVotes($question->getVotes() + 1);
+        } else if($direction === 'down'){
+            $question->setVotes($question->getVotes() - 1);
+        }
+
+        dd($question);
     }
 }
