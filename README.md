@@ -4,7 +4,7 @@
 
 - [x] Charming Development in Symfony 5
 - [x] Symfony 5 Fundamentals: Services, Config & Environments
-- [ ] Doctrine, Symfony & the Database
+- [X] Doctrine, Symfony & the Database
 
 ## Setup
 Make sure you have [Composer installed](https://getcomposer.org/download/)
